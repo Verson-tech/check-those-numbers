@@ -281,16 +281,18 @@
       </p>
     </main>
     <script>
-      /* ===== EDIT THIS BLOCK BEFORE EVERY DRAWING ===== */
+      /* Live numbers load from the NY Open Data API on every page load.
+   The values below are only a FALLBACK if the API is unreachable. */
       const GAMES = {
         powerball: {
+          api: "https://data.ny.gov/resource/d6yy-54nr.json?%24order=draw_date%20DESC&%24limit=1",
           name: "Powerball",
           date: "Drawing: Wed, Nov 18, 2026 (sample, edit me)",
           max: 69,
           bonusMax: 26,
           bonusName: "Powerball",
-          white: [18, 31, 43, 51, 62],
-          bonus: 12,
+          white: [5, 17, 28, 44, 61],
+          bonus: 9,
           prizes: {
             "5+1": "JACKPOT",
             "5+0": "$1,000,000",
@@ -304,6 +306,7 @@
           },
         },
         megamillions: {
+          api: "https://data.ny.gov/resource/5xaw-6ayf.json?%24order=draw_date%20DESC&%24limit=1",
           name: "Mega Millions",
           date: "Drawing: Tue, Nov 17, 2026 (sample, edit me)",
           max: 70,
@@ -341,8 +344,8 @@
           })
           .join("");
         el.innerHTML = `
-    <div class="card"><h2>${g.name} winning numbers</h2><p class="sub">${g.date}</p>
-      <div class="balls">${g.white.map((n) => `<div class="ball">${pad(n)}</div>`).join("")}<div class="ball bonus" title="${g.bonusName}">${pad(g.bonus)}</div></div>
+    <div class="card"><h2>${g.name} winning numbers</h2><p class="sub" data-date></p>
+      <div class="balls" data-win></div>
       <p class="note" style="margin-top:10px">White balls 1–${g.max} · ${g.bonusName} 1–${g.bonusMax}</p></div>
     <div class="card"><h2>Your tickets</h2><p class="sub">Click the first box and type: the cursor moves on by itself.</p>
       <div class="rows"></div>
@@ -455,6 +458,52 @@
               : "No winning lines this time.";
         }
         addRow();
+        showWinning(key);
+        loadLatest(key);
+      }
+
+      function showWinning(key, note) {
+        const g = GAMES[key],
+          el = document.getElementById(key);
+        el.querySelector("[data-win]").innerHTML =
+          g.white.map((n) => `<div class="ball">${pad(n)}</div>`).join("") +
+          `<div class="ball bonus" title="${g.bonusName}">${pad(g.bonus)}</div>`;
+        el.querySelector("[data-date]").textContent = note || g.date;
+      }
+
+      async function loadLatest(key) {
+        const g = GAMES[key],
+          el = document.getElementById(key);
+        el.querySelector("[data-date]").textContent = "Loading latest drawing…";
+        try {
+          const res = await fetch(g.api);
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          const d = (await res.json())[0];
+          const nums = d.winning_numbers.trim().split(/\s+/).map(Number);
+          g.white = nums.slice(0, 5);
+          g.bonus = nums.length > 5 ? nums[5] : Number(d.mega_ball);
+          if (g.white.length !== 5 || !Number.isFinite(g.bonus))
+            throw new Error("Unexpected data shape");
+          const when = new Date(d.draw_date).toLocaleDateString("en-US", {
+            timeZone: "UTC",
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          });
+          showWinning(
+            key,
+            "Latest drawing: " +
+              when +
+              (d.multiplier ? " · multiplier " + d.multiplier + "x" : ""),
+          );
+        } catch (err) {
+          console.error(key, err);
+          showWinning(
+            key,
+            "Couldn’t load live numbers. Showing fallback numbers: " + g.date,
+          );
+        }
       }
 
       Object.keys(GAMES).forEach(buildPanel);
