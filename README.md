@@ -1,5 +1,17 @@
 # Lottery Ticket Checker
 
+## Try it now (no installation)
+
+**Open the app here: https://verson-tech.github.io/check-those-numbers/**
+
+1. Pick **Powerball** or **Mega Millions** at the top.
+2. Click the first box under "Your tickets" and type the numbers from your ticket. The cursor jumps to the next box on its own.
+3. Press **Run to win** to see whether you won. Use **+** to add more ticket lines and **Reset** to start over.
+
+It works in any browser on a phone, tablet or computer, and nothing you type is saved or sent anywhere.
+
+---
+
 A single-page web app that checks Powerball and Mega Millions tickets against the latest official drawing. It is built with plain HTML, CSS and JavaScript, with no frameworks, no build step and no backend.
 
 Winning numbers load automatically from a free, publicly accessible API each time the page opens. You type your ticket numbers and the app tells you what you won.
@@ -43,15 +55,15 @@ The fields used are `draw_date`, `winning_numbers` and, where present, `mega_bal
 
 ## Getting started
 
-No installation is needed.
+Most people should simply use the [hosted version](https://verson-tech.github.io/check-those-numbers/). To run your own copy, no installation is needed:
 
 1. Download `lottery-checker-live.html`.
 2. Open it in any modern browser (Chrome, Edge, Firefox, Safari).
 3. Choose a tab, click the first box and type your numbers.
 
-The file can also be hosted anywhere static files are served, such as GitHub Pages, Netlify, or Amazon S3 with CloudFront.
+The hosted version above runs on GitHub Pages. The file can also be hosted anywhere static files are served, such as Netlify, or Amazon S3 with CloudFront.
 
-> Sandboxed preview environments often block requests to other domains. If the numbers don't load there, open the file locally or host it, and you will see the fallback message instead.
+> Sandboxed preview environments often block requests to other domains. If the numbers don't load there, open the hosted link or the file locally. If the API can't be reached, you will see the fallback message instead.
 
 ## Configuration
 
@@ -76,7 +88,7 @@ For each complete line, the app counts how many of the five white balls appear i
 ## Project structure
 
 ```
-lottery-checker-live.html   # the whole app: HTML, CSS and JavaScript
+lottery-checker-live.html   # the whole app (published as index.html on GitHub Pages): HTML, CSS and JavaScript
 README.md
 ```
 
