@@ -232,6 +232,14 @@
       .run:hover {
         background: #ec7211;
       }
+      .reset {
+        background: var(--card);
+        color: var(--text);
+      }
+      .reset:hover {
+        border-color: var(--bad);
+        color: var(--bad);
+      }
       .summary {
         font-weight: 700;
         margin-top: 10px;
@@ -349,7 +357,7 @@
       <p class="note" style="margin-top:10px">White balls 1–${g.max} · ${g.bonusName} 1–${g.bonusMax}</p></div>
     <div class="card"><h2>Your tickets</h2><p class="sub">Click the first box and type: the cursor moves on by itself.</p>
       <div class="rows"></div>
-      <div class="actions" hidden><button class="btn plus" title="Check more numbers" aria-label="Add another ticket line">+</button><button class="btn run">Run to win</button></div>
+      <div class="actions" hidden><button class="btn plus" title="Check more numbers" aria-label="Add another ticket line">+</button><button class="btn run">Run to win</button><button class="btn reset" title="Clear all ticket numbers">Reset</button></div>
       <div class="summary"></div></div>
     <div class="card"><h2>Prize table</h2><table>${prizeRows}</table></div>`;
         panels.appendChild(el);
@@ -359,6 +367,11 @@
           addRow();
         };
         el.querySelector(".run").onclick = run;
+        el.querySelector(".reset").onclick = () => {
+          rows.innerHTML = "";
+          el.querySelector(".summary").textContent = "";
+          addRow();
+        };
 
         function addRow() {
           const r = document.createElement("div");
