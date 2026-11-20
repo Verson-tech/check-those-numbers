@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Lottery Ticket Checker</title>
+    <style>
+      :root {
+        --ink: #232f3e;
+        --ink2: #161e2d;
+        --orange: #ff9900;
+        --bg: #f2f3f3;
+        --card: #fff;
+        --text: #16191f;
+        --muted: #5f6b7a;
+        --line: #d5dbdb;
+        --ok: #1d8102;
+        --okbg: #eaf5e6;
+        --bad: #d13212;
+        --ball: #232f3e;
+        --ballt: #fff;
+        box-sizing: border-box;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --bg: #0f1520;
+          --card: #1a2333;
+          --text: #eaeded;
+          --muted: #9ba7b6;
+          --line: #313d50;
+          --okbg: #10301a;
+          --ok: #6fd37a;
+          --bad: #ff7a5c;
+          --ball: #eaeded;
+          --ballt: #232f3e;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-padding-top: env(safe-area-inset-top, 0px);
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          "Amazon Ember",
+          "Segoe UI",
+          system-ui,
+          -apple-system,
+          Arial,
+          sans-serif;
+        min-height: 100vh;
+      }
+      header {
+        background: var(--ink);
+        color: #fff;
+        padding: 16px 20px;
+        border-bottom: 3px solid var(--orange);
+      }
+      header h1 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+      }
+      header span {
+        color: var(--orange);
+      }
+      header p {
+        margin: 4px 0 0;
+        font-size: 13px;
+        color: #c4cbd3;
+      }
+      main {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+      .tabs {
+        display: flex;
+        gap: 4px;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 16px;
+      }
+      .tab {
+        background: none;
+        border: 0;
+        border-bottom: 3px solid transparent;
+        padding: 12px 18px;
+        font: inherit;
+        font-weight: 600;
+        color: var(--muted);
+        cursor: pointer;
+      }
+      .tab[aria-selected="true"] {
+        color: var(--text);
+        border-bottom-color: var(--orange);
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+      .card h2 {
+        margin: 0 0 4px;
+        font-size: 16px;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 13px;
+        margin: 0 0 12px;
+      }
+      .balls {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .ball {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        background: var(--ball);
+        color: var(--ballt);
+      }
+      .ball.bonus {
+        background: var(--orange);
+        color: #16191f;
+      }
+      .row {
+        padding: 12px 0;
+        border-top: 1px solid var(--line);
+      }
+      .row:first-child {
+        border-top: 0;
+      }
+      .row .lbl {
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 6px;
+        font-weight: 600;
+      }
+      .inputs {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .inputs input {
+        width: 48px;
+        height: 44px;
+        text-align: center;
+        font: inherit;
+        font-weight: 700;
+        font-size: 16px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--card);
+        color: var(--text);
+      }
+      .inputs input:focus {
+        outline: 2px solid var(--orange);
+        border-color: var(--orange);
+      }
+      .inputs input.bonus {
+        border-color: var(--orange);
+      }
+      .inputs input.bad {
+        border-color: var(--bad);
+        background: rgba(209, 50, 18, 0.1);
+      }
+      .inputs input.hit {
+        background: var(--okbg);
+        border-color: var(--ok);
+        color: var(--ok);
+      }
+      .res {
+        margin-top: 8px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .res.win {
+        color: var(--ok);
+      }
+      .res.lose {
+        color: var(--muted);
+      }
+      .res.err {
+        color: var(--bad);
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .actions[hidden] {
+        display: none;
+      }
+      button.btn {
+        font: inherit;
+        font-weight: 700;
+        border-radius: 6px;
+        padding: 10px 18px;
+        cursor: pointer;
+        border: 1px solid var(--ink);
+      }
+      .plus {
+        background: var(--card);
+        color: var(--text);
+        font-size: 18px;
+        line-height: 1;
+        min-width: 46px;
+      }
+      .run {
+        background: var(--orange);
+        border-color: #ec7211;
+        color: #16191f;
+        flex: 1;
+      }
+      .run:hover {
+        background: #ec7211;
+      }
+      .summary {
+        font-weight: 700;
+        margin-top: 10px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      td {
+        padding: 5px 0;
+        border-top: 1px solid var(--line);
+      }
+      td:last-child {
+        text-align: right;
+        font-weight: 600;
+      }
+      .note {
+        font-size: 12px;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1><span>▲</span> Lottery Ticket Checker</h1>
+      <p>Check your tickets against the latest drawing</p>
+    </header>
+    <main>
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" data-g="powerball" aria-selected="true">
+          Powerball
+        </button>
+        <button
+          class="tab"
+          role="tab"
+          data-g="megamillions"
+          aria-selected="false"
+        >
+          Mega Millions
+        </button>
+      </div>
+      <div id="panels"></div>
+      <p class="note">
+        For entertainment only. Prize amounts shown are base prizes; always
+        verify results on the official lottery sites.
+      </p>
+    </main>
+    <script>
+      /* ===== EDIT THIS BLOCK BEFORE EVERY DRAWING ===== */
+      const GAMES = {
+        powerball: {
+          name: "Powerball",
+          date: "Drawing: Wed, Nov 18, 2026 (sample, edit me)",
+          max: 69,
+          bonusMax: 26,
+          bonusName: "Powerball",
+          white: [18, 31, 43, 51, 62],
+          bonus: 12,
+          prizes: {
+            "5+1": "JACKPOT",
+            "5+0": "$1,000,000",
+            "4+1": "$50,000",
+            "4+0": "$100",
+            "3+1": "$100",
+            "3+0": "$7",
+            "2+1": "$7",
+            "1+1": "$4",
+            "0+1": "$4",
+          },
+        },
+        megamillions: {
+          name: "Mega Millions",
+          date: "Drawing: Tue, Nov 17, 2026 (sample, edit me)",
+          max: 70,
+          bonusMax: 24,
+          bonusName: "Mega Ball",
+          white: [3, 14, 29, 51, 68],
+          bonus: 7,
+          prizes: {
+            "5+1": "JACKPOT",
+            "5+0": "$2,000,000",
+            "4+1": "$10,000",
+            "4+0": "$500",
+            "3+1": "$200",
+            "3+0": "$10",
+            "2+1": "$10",
+            "1+1": "$7",
+            "0+1": "$5",
+          },
+        },
+      };
+      /* ================================================= */
+
+      const panels = document.getElementById("panels");
+      const pad = (n) => String(n).padStart(2, "0");
+
+      function buildPanel(key) {
+        const g = GAMES[key],
+          el = document.createElement("section");
+        el.id = key;
+        el.hidden = key !== "powerball";
+        const prizeRows = Object.entries(g.prizes)
+          .map(([k, v]) => {
+            const [w, b] = k.split("+");
+            return `<tr><td>${w} white${b === "1" ? " + " + g.bonusName : ""}</td><td>${v}</td></tr>`;
+          })
+          .join("");
+        el.innerHTML = `
+    <div class="card"><h2>${g.name} winning numbers</h2><p class="sub">${g.date}</p>
+      <div class="balls">${g.white.map((n) => `<div class="ball">${pad(n)}</div>`).join("")}<div class="ball bonus" title="${g.bonusName}">${pad(g.bonus)}</div></div>
+      <p class="note" style="margin-top:10px">White balls 1–${g.max} · ${g.bonusName} 1–${g.bonusMax}</p></div>
+    <div class="card"><h2>Your tickets</h2><p class="sub">Click the first box and type: the cursor moves on by itself.</p>
+      <div class="rows"></div>
+      <div class="actions" hidden><button class="btn plus" title="Check more numbers" aria-label="Add another ticket line">+</button><button class="btn run">Run to win</button></div>
+      <div class="summary"></div></div>
+    <div class="card"><h2>Prize table</h2><table>${prizeRows}</table></div>`;
+        panels.appendChild(el);
+        const rows = el.querySelector(".rows"),
+          actions = el.querySelector(".actions");
+        el.querySelector(".plus").onclick = () => {
+          addRow();
+        };
+        el.querySelector(".run").onclick = run;
+
+        function addRow() {
+          const r = document.createElement("div");
+          r.className = "row";
+          r.innerHTML = `<div class="lbl">Line ${rows.children.length + 1}</div><div class="inputs">
+      ${[0, 1, 2, 3, 4].map(() => `<input inputmode="numeric" maxlength="2" aria-label="White ball">`).join("")}
+      <input class="bonus" inputmode="numeric" maxlength="2" aria-label="${g.bonusName}"></div><div class="res"></div>`;
+          rows.appendChild(r);
+          const ins = [...r.querySelectorAll("input")];
+          ins.forEach((inp, i) => {
+            const max = i === 5 ? g.bonusMax : g.max;
+            inp.addEventListener("input", () => {
+              inp.value = inp.value.replace(/\D/g, "").slice(0, 2);
+              const v = inp.value;
+              if (v.length === 2 || (v.length === 1 && Number(v) * 10 > max)) {
+                if (ins[i + 1]) ins[i + 1].focus();
+              }
+              refresh();
+            });
+            inp.addEventListener("keydown", (e) => {
+              if (e.key === "Backspace" && !inp.value && ins[i - 1])
+                ins[i - 1].focus();
+            });
+            inp.addEventListener("focus", () => inp.select());
+            inp.addEventListener("paste", (e) => {
+              const nums = (
+                e.clipboardData.getData("text").match(/\d+/g) || []
+              ).slice(0, 6 - i);
+              if (nums.length > 1) {
+                e.preventDefault();
+                nums.forEach((n, k) => (ins[i + k].value = n.slice(0, 2)));
+                refresh();
+              }
+            });
+          });
+          ins[0].focus();
+          refresh();
+        }
+
+        function parse(r) {
+          const ins = [...r.querySelectorAll("input")],
+            vals = ins.map((i) => (i.value === "" ? null : Number(i.value)));
+          const ok = vals.map(
+            (v, i) =>
+              v !== null && v >= 1 && v <= (i === 5 ? g.bonusMax : g.max),
+          );
+          vals.slice(0, 5).forEach((v, i) => {
+            if (v !== null && vals.slice(0, 5).indexOf(v) !== i) ok[i] = false;
+          });
+          ins.forEach((inp, i) => {
+            inp.classList.toggle("bad", inp.value !== "" && !ok[i]);
+            inp.classList.remove("hit");
+          });
+          return { ins, vals, complete: ok.every(Boolean) };
+        }
+        function refresh() {
+          const last = rows.lastElementChild;
+          actions.hidden = !(last && parse(last).complete);
+        }
+        function run() {
+          let total = 0,
+            wins = 0,
+            jackpot = false;
+          [...rows.children].forEach((r) => {
+            const { ins, vals, complete } = parse(r),
+              res = r.querySelector(".res");
+            if (!complete) {
+              if (vals.some((v) => v !== null)) {
+                res.className = "res err";
+                res.textContent = "Incomplete or invalid numbers";
+              }
+              return;
+            }
+            const hitW = vals.slice(0, 5).filter((v) => g.white.includes(v)),
+              hitB = vals[5] === g.bonus;
+            ins.forEach((inp, i) => {
+              if (i < 5 ? g.white.includes(vals[i]) : hitB)
+                inp.classList.add("hit");
+            });
+            const prize = g.prizes[hitW.length + "+" + (hitB ? 1 : 0)],
+              matched = `${hitW.length} white${hitB ? " + " + g.bonusName : ""}`;
+            if (prize) {
+              wins++;
+              if (prize === "JACKPOT") jackpot = true;
+              else total += Number(prize.replace(/\D/g, ""));
+              res.className = "res win";
+              res.textContent = `🎉 ${matched}: ${prize}`;
+            } else {
+              res.className = "res lose";
+              res.textContent = `${hitW.length} white matched: no prize`;
+            }
+          });
+          el.querySelector(".summary").textContent = jackpot
+            ? "🏆 JACKPOT! Contact your state lottery right away."
+            : wins
+              ? `${wins} winning line${wins > 1 ? "s" : ""}, total: $${total.toLocaleString("en-US")}`
+              : "No winning lines this time.";
+        }
+        addRow();
+      }
+
+      Object.keys(GAMES).forEach(buildPanel);
+      document.querySelectorAll(".tab").forEach(
+        (t) =>
+          (t.onclick = () => {
+            document
+              .querySelectorAll(".tab")
+              .forEach((x) => x.setAttribute("aria-selected", x === t));
+            Object.keys(GAMES).forEach(
+              (k) => (document.getElementById(k).hidden = k !== t.dataset.g),
+            );
+          }),
+      );
+    </script>
+  </body>
+</html>
